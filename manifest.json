@@ -1,0 +1,8 @@
+{
+  "name": "Card News Creator by Aha Marketing",
+  "id": "cardnews-creator-aha",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"]
+}
