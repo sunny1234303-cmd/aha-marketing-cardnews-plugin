@@ -91,6 +91,15 @@
   .hidden { display: none !important; }
   .chevron { transition: transform .2s; }
   .chevron.open { transform: rotate(180deg); }
+
+  /* ── 리사이즈 핸들 ── */
+  .resize-handle {
+    position: fixed; right: 0; bottom: 0;
+    width: 18px; height: 18px; cursor: nwse-resize;
+    z-index: 100; opacity: 0.35;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Cpath d='M17 7l-10 10M17 12l-5 5M17 2l-15 15' stroke='%23555' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center;
+  }
+  .resize-handle:hover { opacity: 0.7; }
 </style>
 </head>
 <body>
@@ -226,6 +235,8 @@
 </div><!-- end scroll-area -->
 
 <div class="status" id="status"></div>
+
+<div class="resize-handle" id="resize-handle"></div>
 
 <div class="action-bar">
   <button class="btn btn-primary" id="btn-generate" disabled>Figma에 삽입</button>
@@ -525,6 +536,32 @@ window.addEventListener('message', e => {
     setStatus('오류: ' + msg.message, 'err');
   }
 });
+
+// ─── 창 리사이즈 핸들 ────────────────────────────────────────────────────────
+(function () {
+  const handle = document.getElementById('resize-handle');
+  let startX, startY, startW, startH;
+
+  handle.addEventListener('mousedown', e => {
+    e.preventDefault();
+    startX = e.clientX;
+    startY = e.clientY;
+    startW = window.innerWidth;
+    startH = window.innerHeight;
+
+    function onMove(e) {
+      const w = Math.max(400, startW + (e.clientX - startX));
+      const h = Math.max(500, startH + (e.clientY - startY));
+      window.parent.postMessage({ pluginMessage: { type: 'resize', width: Math.round(w), height: Math.round(h) } }, '*');
+    }
+    function onUp() {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  });
+})();
 
 // ─── 상태 메시지 ─────────────────────────────────────────────────────────────
 function setStatus(msg, type = '') {

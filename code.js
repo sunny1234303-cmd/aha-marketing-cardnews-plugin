@@ -25,6 +25,15 @@ let lastFrameIds = [];
 figma.ui.onmessage = async (msg) => {
   if (msg.type === 'cancel') { figma.closePlugin(); return; }
 
+  // 창 리사이즈
+  if (msg.type === 'resize') {
+    figma.ui.resize(
+      Math.max(400, Math.min(900, msg.width)),
+      Math.max(500, Math.min(1200, msg.height))
+    );
+    return;
+  }
+
   // 슬라이드 생성
   if (msg.type === 'generate') {
     try {
