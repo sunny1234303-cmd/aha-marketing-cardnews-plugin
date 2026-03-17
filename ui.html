@@ -151,6 +151,9 @@
       <svg class="chevron open" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div class="settings-body" id="settings-body">
+      <!-- MD 설정 적용 안내 -->
+      <div id="fm-applied" class="hidden" style="font-size:11px;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:7px 10px;"></div>
+
       <!-- 테마 -->
       <div class="field">
         <div class="field-label">테마</div>
@@ -256,9 +259,62 @@ const THEMES = {
   custom: null,
 };
 
+// ─── Frontmatter 파싱 → 디자인 설정 자동 적용 ────────────────────────────────
+function parseFrontmatter(text) {
+  const match = text.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return null;
+  const result = {};
+  for (const line of match[1].split('\n')) {
+    const [key, ...rest] = line.split(':');
+    if (key && rest.length) result[key.trim()] = rest.join(':').trim();
+  }
+  return result;
+}
+
+function applyFrontmatterSettings(fm) {
+  if (!fm || fm.type !== 'cardnews') return;
+
+  // 테마 적용
+  if (fm.theme && ['dark', 'light', 'brand'].includes(fm.theme)) {
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.theme-btn[data-theme="${fm.theme}"]`);
+    if (btn) btn.classList.add('active');
+    currentTheme = fm.theme;
+    document.getElementById('custom-colors').classList.add('hidden');
+  }
+
+  // 프레임 크기 적용
+  if (fm.frame) {
+    const select = document.getElementById('s-preset');
+    const opt = Array.from(select.options).find(o => o.value === fm.frame);
+    if (opt) {
+      select.value = fm.frame;
+      const [w, h] = fm.frame.split('x');
+      document.getElementById('s-width').value = w;
+      document.getElementById('s-height').value = h;
+      document.getElementById('custom-size-field').style.display = 'none';
+    }
+  }
+
+  // 폰트 적용
+  if (fm.font) document.getElementById('s-font').value = fm.font;
+
+  // 제목/본문 크기
+  if (fm.title_size) document.getElementById('s-title-size').value = fm.title_size;
+  if (fm.body_size)  document.getElementById('s-body-size').value  = fm.body_size;
+
+  // 설정 불러옴 표시
+  const indicator = document.getElementById('fm-applied');
+  if (indicator) {
+    indicator.textContent = `✓ MD 파일에서 설정 불러옴 (테마: ${fm.theme}, 프레임: ${fm.frame || '?'})`;
+    indicator.classList.remove('hidden');
+  }
+}
+
 // ─── MD 파싱 ─────────────────────────────────────────────────────────────────
 function parseMd(text) {
-  // 1. frontmatter 제거
+  // 1. frontmatter 파싱 후 제거
+  const fm = parseFrontmatter(text);
   text = text.replace(/^---[\s\S]*?---\n?/, '').trim();
 
   // 2. --- 구분자로 섹션 분리, 없으면 ## 헤더로 분리
@@ -355,6 +411,11 @@ async function handleFile(file) {
     return;
   }
   const text = await file.text();
+
+  // frontmatter 먼저 파싱해 설정 자동 적용
+  const fm = parseFrontmatter(text);
+  applyFrontmatterSettings(fm);
+
   parsedSlides = parseMd(text);
 
   if (!parsedSlides.length) {
@@ -402,6 +463,7 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   document.getElementById('settings-section').classList.add('hidden');
   document.getElementById('btn-generate').disabled = true;
   document.getElementById('btn-export').disabled = true;
+  document.getElementById('fm-applied').classList.add('hidden');
   setStatus('');
 });
 
