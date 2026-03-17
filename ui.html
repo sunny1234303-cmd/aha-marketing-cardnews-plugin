@@ -296,6 +296,29 @@ function applyFrontmatterSettings(fm) {
     }
   }
 
+  // 커스텀 컬러 적용
+  if (fm.bg_color || fm.text_color || fm.accent_color) {
+    // 테마를 커스텀으로 전환
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    const customBtn = document.querySelector('.theme-btn[data-theme="custom"]');
+    if (customBtn) customBtn.classList.add('active');
+    currentTheme = 'custom';
+    document.getElementById('custom-colors').classList.remove('hidden');
+
+    if (fm.bg_color) {
+      document.getElementById('c-bg').value = fm.bg_color;
+      document.getElementById('c-bg-hex').value = fm.bg_color;
+    }
+    if (fm.text_color) {
+      document.getElementById('c-text').value = fm.text_color;
+      document.getElementById('c-text-hex').value = fm.text_color;
+    }
+    if (fm.accent_color) {
+      document.getElementById('c-accent').value = fm.accent_color;
+      document.getElementById('c-accent-hex').value = fm.accent_color;
+    }
+  }
+
   // 폰트 적용
   if (fm.font) document.getElementById('s-font').value = fm.font;
 
