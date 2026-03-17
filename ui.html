@@ -4,578 +4,486 @@
 <meta charset="UTF-8" />
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, 'Noto Sans KR', sans-serif; font-size: 13px; color: #1a1a1a; background: #f5f5f5; height: 100vh; display: flex; flex-direction: column; }
+  body { font-family: -apple-system, 'Noto Sans KR', sans-serif; font-size: 13px; color: #1a1a1a; background: #f5f5f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
   /* ── 헤더 ── */
-  .header { background: #fff; border-bottom: 1px solid #e5e5e5; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
-  .header-title { font-size: 14px; font-weight: 700; color: #1a1a1a; }
+  .header { background: #fff; border-bottom: 1px solid #e5e5e5; padding: 11px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .header-title { font-size: 14px; font-weight: 700; }
   .header-badge { font-size: 10px; background: #7C5CFC; color: #fff; border-radius: 4px; padding: 2px 6px; }
 
-  /* ── 탭 ── */
-  .tabs { display: flex; background: #fff; border-bottom: 1px solid #e5e5e5; }
-  .tab { flex: 1; padding: 8px; text-align: center; font-size: 12px; font-weight: 600; color: #888; cursor: pointer; border-bottom: 2px solid transparent; transition: all .15s; }
-  .tab.active { color: #7C5CFC; border-color: #7C5CFC; }
-
   /* ── 스크롤 영역 ── */
-  .scroll-area { flex: 1; overflow-y: auto; padding: 12px 14px; }
+  .scroll-area { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
 
-  /* ── 슬라이드 목록 ── */
-  .slide-list { display: flex; flex-direction: column; gap: 8px; }
-  .slide-card { background: #fff; border: 2px solid #e5e5e5; border-radius: 10px; padding: 12px; cursor: pointer; transition: border-color .15s; display: flex; gap: 10px; align-items: flex-start; }
-  .slide-card:hover { border-color: #c4b5fd; }
-  .slide-card.active { border-color: #7C5CFC; }
-  .slide-thumb { width: 52px; height: 52px; border-radius: 6px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 5px; overflow: hidden; position: relative; }
-  .slide-thumb-img { position: absolute; inset: 0; object-fit: cover; width: 100%; height: 100%; border-radius: 6px; }
-  .slide-thumb-overlay { position: absolute; inset: 0; border-radius: 6px; }
-  .slide-thumb-content { position: relative; z-index: 1; }
-  .slide-thumb-tag { display: inline-block; background: #7C5CFC; border-radius: 3px; width: 18px; height: 5px; margin-bottom: 3px; }
-  .slide-thumb-title { font-size: 6px; font-weight: 700; color: #fff; line-height: 1.3; }
-  .slide-info { flex: 1; min-width: 0; }
-  .slide-num { font-size: 11px; color: #888; margin-bottom: 2px; }
-  .slide-title-preview { font-size: 13px; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .slide-body-preview { font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-  .slide-actions { display: flex; gap: 4px; flex-shrink: 0; }
-  .btn-icon { width: 26px; height: 26px; border: none; background: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #888; transition: background .1s, color .1s; }
-  .btn-icon:hover { background: #f0f0f0; color: #1a1a1a; }
-  .btn-icon.danger:hover { background: #fee2e2; color: #dc2626; }
-
-  .add-slide-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; background: #fff; border: 2px dashed #d1d5db; border-radius: 10px; color: #888; font-size: 13px; cursor: pointer; transition: border-color .15s, color .15s; }
-  .add-slide-btn:hover { border-color: #7C5CFC; color: #7C5CFC; }
-
-  /* ── 슬라이드 편집기 ── */
-  .editor { display: flex; flex-direction: column; gap: 14px; }
-  .editor-header { display: flex; align-items: center; justify-content: space-between; }
-  .editor-title { font-size: 13px; font-weight: 700; }
-  .section-label { font-size: 11px; font-weight: 600; color: #555; margin-bottom: 5px; display: block; }
-  .field { display: flex; flex-direction: column; }
-  textarea, input[type=text], input[type=number] {
-    width: 100%; border: 1px solid #e2e2e2; border-radius: 7px; padding: 8px 10px;
-    font-size: 13px; color: #1a1a1a; background: #fff; outline: none; transition: border-color .15s; font-family: inherit;
+  /* ── 파일 드롭존 ── */
+  .dropzone {
+    border: 2px dashed #d1d5db; border-radius: 12px; background: #fff;
+    padding: 28px 16px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s;
+    position: relative;
   }
-  textarea:focus, input[type=text]:focus, input[type=number]:focus { border-color: #7C5CFC; }
-  textarea { resize: vertical; min-height: 64px; }
+  .dropzone:hover, .dropzone.drag-over { border-color: #7C5CFC; background: #faf5ff; }
+  .dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .dropzone-icon { font-size: 28px; margin-bottom: 8px; }
+  .dropzone-text { font-size: 13px; font-weight: 600; color: #555; }
+  .dropzone-sub  { font-size: 11px; color: #999; margin-top: 4px; }
 
-  /* 태그 입력 */
-  .tag-input-wrap { display: flex; flex-wrap: wrap; gap: 6px; border: 1px solid #e2e2e2; border-radius: 7px; padding: 7px 10px; background: #fff; cursor: text; }
-  .tag-input-wrap:focus-within { border-color: #7C5CFC; }
-  .tag-pill { display: flex; align-items: center; gap: 4px; background: #ede9fe; color: #5b21b6; border-radius: 5px; padding: 2px 8px; font-size: 12px; }
-  .tag-pill-remove { background: none; border: none; cursor: pointer; color: #7c3aed; font-size: 14px; line-height: 1; padding: 0; }
-  .tag-input { border: none; outline: none; font-size: 13px; min-width: 80px; flex: 1; padding: 0; background: transparent; }
+  /* ── 파일 정보 ── */
+  .file-info { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+  .file-name { font-size: 13px; font-weight: 600; color: #1a1a1a; display: flex; align-items: center; gap: 6px; }
+  .file-meta { font-size: 11px; color: #888; margin-top: 2px; }
+  .btn-text { background: none; border: none; color: #888; font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 5px; }
+  .btn-text:hover { color: #dc2626; background: #fee2e2; }
 
-  /* 배경 선택 */
-  .bg-toggle { display: flex; border: 1px solid #e2e2e2; border-radius: 7px; overflow: hidden; }
-  .bg-toggle-btn { flex: 1; padding: 7px; text-align: center; font-size: 12px; font-weight: 600; cursor: pointer; color: #888; background: #fff; border: none; transition: all .15s; }
-  .bg-toggle-btn.active { background: #7C5CFC; color: #fff; }
+  /* ── 파싱된 슬라이드 미리보기 ── */
+  .section-title { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 6px; }
+  .slide-previews { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; }
+  .slide-preview-item { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 10px 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .slide-preview-num { font-size: 11px; font-weight: 700; color: #7C5CFC; flex-shrink: 0; width: 20px; }
+  .slide-preview-title { font-size: 13px; font-weight: 600; color: #1a1a1a; line-clamp: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .slide-preview-body  { font-size: 11px; color: #888; margin-top: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .slide-preview-tags  { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .slide-preview-tag   { font-size: 10px; background: #ede9fe; color: #5b21b6; border-radius: 4px; padding: 1px 6px; }
 
-  .color-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-  input[type=color] { width: 36px; height: 36px; border: 1px solid #e2e2e2; border-radius: 7px; padding: 2px; cursor: pointer; background: #fff; }
-  .color-hex { width: 88px; }
-
-  .image-upload-area { margin-top: 8px; border: 2px dashed #d1d5db; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: border-color .15s; position: relative; }
-  .image-upload-area:hover { border-color: #7C5CFC; }
-  .image-upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .image-preview { width: 100%; max-height: 120px; object-fit: cover; border-radius: 6px; margin-top: 8px; display: none; }
-  .overlay-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-  .overlay-row label { font-size: 12px; color: #555; white-space: nowrap; }
-  input[type=range] { flex: 1; accent-color: #7C5CFC; }
-  .overlay-val { font-size: 12px; color: #555; width: 32px; text-align: right; }
-
-  /* 설정 탭 */
+  /* ── 설정 섹션 ── */
+  .settings-section { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; overflow: hidden; }
+  .settings-toggle { width: 100%; background: none; border: none; padding: 11px 14px; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+  .settings-toggle:hover { background: #fafafa; }
+  .settings-body { padding: 0 14px 14px; border-top: 1px solid #f0f0f0; display: flex; flex-direction: column; gap: 10px; }
   .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .settings-full { grid-column: 1 / -1; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field-label { font-size: 11px; font-weight: 600; color: #555; }
+  input[type=text], input[type=number] {
+    width: 100%; border: 1px solid #e2e2e2; border-radius: 7px; padding: 7px 10px;
+    font-size: 13px; color: #1a1a1a; outline: none; transition: border-color .15s; font-family: inherit; background: #fff;
+  }
+  input:focus { border-color: #7C5CFC; }
+
+  /* 테마 버튼 */
+  .theme-btns { display: flex; gap: 6px; }
+  .theme-btn { flex: 1; padding: 7px 4px; border: 2px solid #e5e5e5; border-radius: 7px; font-size: 11px; font-weight: 600; cursor: pointer; background: #fff; transition: all .15s; text-align: center; }
+  .theme-btn.active { border-color: #7C5CFC; color: #7C5CFC; background: #faf5ff; }
+  .theme-btn span { display: block; width: 20px; height: 20px; border-radius: 4px; margin: 0 auto 3px; }
+
+  /* 색상 행 */
+  .color-row { display: flex; align-items: center; gap: 8px; }
+  input[type=color] { width: 34px; height: 34px; border: 1px solid #e2e2e2; border-radius: 6px; padding: 2px; cursor: pointer; background: #fff; flex-shrink: 0; }
+  .color-hex { flex: 1; }
+
+  /* 태그 파싱 옵션 */
+  .parse-option { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; }
+  .parse-option label { font-size: 12px; color: #555; cursor: pointer; }
+  input[type=checkbox] { accent-color: #7C5CFC; width: 14px; height: 14px; cursor: pointer; }
 
   /* ── 하단 버튼 ── */
-  .action-bar { background: #fff; border-top: 1px solid #e5e5e5; padding: 10px 14px; display: flex; gap: 8px; }
+  .action-bar { background: #fff; border-top: 1px solid #e5e5e5; padding: 10px 14px; display: flex; gap: 8px; flex-shrink: 0; }
   .btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: background .15s; }
   .btn-primary { background: #7C5CFC; color: #fff; }
-  .btn-primary:hover { background: #6d4df5; }
+  .btn-primary:hover:not(:disabled) { background: #6d4df5; }
   .btn-primary:disabled { background: #c4b5fd; cursor: not-allowed; }
   .btn-outline { background: #fff; color: #555; border: 1px solid #e2e2e2; }
-  .btn-outline:hover { border-color: #7C5CFC; color: #7C5CFC; }
-  .btn-outline:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-outline:hover:not(:disabled) { border-color: #7C5CFC; color: #7C5CFC; }
+  .btn-outline:disabled { opacity: .4; cursor: not-allowed; }
 
-  /* 상태 메시지 */
-  .status { font-size: 12px; color: #555; padding: 0 14px 8px; text-align: center; min-height: 18px; }
-  .status.ok { color: #16a34a; }
+  /* 상태 */
+  .status { font-size: 12px; color: #555; padding: 4px 14px; text-align: center; min-height: 20px; flex-shrink: 0; }
+  .status.ok  { color: #16a34a; }
   .status.err { color: #dc2626; }
 
-  /* 구분선 */
-  .divider { height: 1px; background: #f0f0f0; margin: 2px 0; }
-
   .hidden { display: none !important; }
+  .chevron { transition: transform .2s; }
+  .chevron.open { transform: rotate(180deg); }
 </style>
 </head>
 <body>
 
-<!-- 헤더 -->
 <div class="header">
   <span class="header-title">🎴 카드뉴스 제작기</span>
   <span class="header-badge">by Aha Marketing</span>
 </div>
 
-<!-- 탭 -->
-<div class="tabs">
-  <div class="tab active" data-tab="slides">슬라이드</div>
-  <div class="tab" data-tab="settings">설정</div>
-</div>
+<div class="scroll-area">
 
-<!-- 상태 메시지 -->
+  <!-- ① MD 파일 업로드 -->
+  <div>
+    <div class="section-title">① MD 파일 업로드</div>
+    <div class="dropzone" id="dropzone">
+      <input type="file" id="md-file" accept=".md,text/markdown" multiple />
+      <div class="dropzone-icon">📄</div>
+      <div class="dropzone-text">MD 파일을 드래그하거나 클릭하세요</div>
+      <div class="dropzone-sub">Aha Marketing에서 다운로드한 카드뉴스 .md 파일</div>
+    </div>
+
+    <!-- 업로드된 파일 정보 -->
+    <div id="file-info" class="hidden" style="margin-top:8px">
+      <div class="file-info">
+        <div>
+          <div class="file-name">📄 <span id="file-name-text"></span></div>
+          <div class="file-meta" id="file-meta-text"></div>
+        </div>
+        <button class="btn-text" id="btn-clear">파일 변경</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 슬라이드 미리보기 -->
+  <div id="preview-section" class="hidden">
+    <div class="section-title">② 파싱된 슬라이드 미리보기</div>
+    <div class="slide-previews" id="slide-previews"></div>
+
+    <div class="parse-option" style="margin-top:8px">
+      <input type="checkbox" id="list-as-tags" checked />
+      <label for="list-as-tags">목록 항목(- item)을 슬라이드 <strong>태그/뱃지</strong>로 사용</label>
+    </div>
+  </div>
+
+  <!-- ③ 디자인 설정 -->
+  <div id="settings-section" class="hidden settings-section">
+    <button class="settings-toggle" id="settings-toggle">
+      ③ 디자인 설정
+      <svg class="chevron open" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="settings-body" id="settings-body">
+      <!-- 테마 -->
+      <div class="field">
+        <div class="field-label">테마</div>
+        <div class="theme-btns">
+          <button class="theme-btn active" data-theme="dark">
+            <span style="background:#1a1a1a;border:1px solid #555"></span>Dark
+          </button>
+          <button class="theme-btn" data-theme="light">
+            <span style="background:#ffffff;border:1px solid #e5e5e5"></span>Light
+          </button>
+          <button class="theme-btn" data-theme="brand">
+            <span style="background:#7C5CFC"></span>Brand
+          </button>
+          <button class="theme-btn" data-theme="custom">
+            <span style="background: linear-gradient(135deg,#f59e0b,#ef4444)"></span>커스텀
+          </button>
+        </div>
+      </div>
+
+      <!-- 커스텀 색상 (hidden by default) -->
+      <div id="custom-colors" class="settings-grid hidden">
+        <div class="field">
+          <div class="field-label">배경색</div>
+          <div class="color-row">
+            <input type="color" id="c-bg" value="#1a1a1a" />
+            <input type="text" class="color-hex" id="c-bg-hex" value="#1a1a1a" maxlength="7" />
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">텍스트색</div>
+          <div class="color-row">
+            <input type="color" id="c-text" value="#ffffff" />
+            <input type="text" class="color-hex" id="c-text-hex" value="#ffffff" maxlength="7" />
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">뱃지 강조색</div>
+          <div class="color-row">
+            <input type="color" id="c-accent" value="#7C5CFC" />
+            <input type="text" class="color-hex" id="c-accent-hex" value="#7C5CFC" maxlength="7" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 폰트 / 크기 -->
+      <div class="settings-grid">
+        <div class="field" style="grid-column:1/-1">
+          <div class="field-label">폰트 (Figma에 설치된 폰트명)</div>
+          <input type="text" id="s-font" value="Noto Sans KR" placeholder="Noto Sans KR, Pretendard 등" />
+        </div>
+        <div class="field">
+          <div class="field-label">프레임 크기</div>
+          <select id="s-preset" style="width:100%;border:1px solid #e2e2e2;border-radius:7px;padding:7px 10px;font-size:13px;background:#fff;outline:none;cursor:pointer">
+            <option value="1080x1080">SNS 정사각형 1080×1080</option>
+            <option value="1080x1920">스토리 세로 1080×1920</option>
+            <option value="1200x628">배너 가로 1200×628</option>
+            <option value="custom">직접 입력</option>
+          </select>
+        </div>
+        <div class="field" id="custom-size-field" style="display:flex;flex-direction:row;gap:6px;align-items:flex-end">
+          <div class="field" style="flex:1">
+            <div class="field-label">너비</div>
+            <input type="number" id="s-width" value="1080" min="400" max="3000" />
+          </div>
+          <div class="field" style="flex:1">
+            <div class="field-label">높이</div>
+            <input type="number" id="s-height" value="1080" min="400" max="3000" />
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">제목 크기 (px)</div>
+          <input type="number" id="s-title-size" value="72" min="20" max="200" />
+        </div>
+        <div class="field">
+          <div class="field-label">본문 크기 (px)</div>
+          <input type="number" id="s-body-size" value="32" min="12" max="100" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end scroll-area -->
+
 <div class="status" id="status"></div>
 
-<!-- 슬라이드 탭 -->
-<div class="scroll-area" id="tab-slides">
-  <div class="slide-list" id="slide-list"></div>
-  <div style="height:8px"></div>
-  <button class="add-slide-btn" id="add-slide-btn">＋ 슬라이드 추가</button>
-  <div style="height:16px"></div>
-  <div class="divider"></div>
-  <div style="height:12px"></div>
-
-  <!-- 슬라이드 편집기 -->
-  <div class="editor" id="editor">
-    <div class="editor-header">
-      <span class="editor-title" id="editor-title">슬라이드 1 편집</span>
-    </div>
-
-    <!-- 제목 -->
-    <div class="field">
-      <span class="section-label">제목 *</span>
-      <textarea id="e-title" rows="2" placeholder="예: 릴스 안 하고 7개월 만에 '월 5,600만 원' 번 비결"></textarea>
-    </div>
-
-    <!-- 본문 -->
-    <div class="field">
-      <span class="section-label">본문 (선택)</span>
-      <textarea id="e-body" rows="2" placeholder="예: 터지는 릴스 기획하느라 지치셨다면 이 글을 보세요."></textarea>
-    </div>
-
-    <!-- 태그 -->
-    <div class="field">
-      <span class="section-label">태그 / 뱃지 (Enter로 추가)</span>
-      <div class="tag-input-wrap" id="tag-wrap">
-        <input class="tag-input" id="tag-input" type="text" placeholder="서비스 기획, GTM…" />
-      </div>
-    </div>
-
-    <!-- 배경 -->
-    <div class="field">
-      <span class="section-label">배경</span>
-      <div class="bg-toggle">
-        <button class="bg-toggle-btn active" data-bg="color">🎨 색상</button>
-        <button class="bg-toggle-btn" data-bg="image">🖼 이미지</button>
-      </div>
-
-      <!-- 색상 배경 -->
-      <div id="bg-color-area" class="color-row">
-        <input type="color" id="e-bgcolor" value="#1a1a1a" />
-        <input type="text" class="color-hex" id="e-bgcolor-hex" value="#1a1a1a" maxlength="7" />
-        <span style="font-size:11px;color:#888">배경색</span>
-      </div>
-
-      <!-- 이미지 배경 -->
-      <div id="bg-image-area" class="hidden">
-        <div class="image-upload-area" id="upload-area">
-          <input type="file" id="bg-file" accept="image/*" />
-          <div id="upload-hint">📂 클릭하거나 이미지를 드래그하세요</div>
-          <img id="img-preview" class="image-preview" alt="" />
-        </div>
-        <div class="overlay-row">
-          <label>오버레이 어둡기</label>
-          <input type="range" id="overlay-range" min="0" max="90" value="55" />
-          <span class="overlay-val" id="overlay-val">55%</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 텍스트 색상 & 강조색 -->
-    <div style="display:flex;gap:12px">
-      <div class="field" style="flex:1">
-        <span class="section-label">텍스트 색상</span>
-        <div class="color-row" style="margin-top:0">
-          <input type="color" id="e-textcolor" value="#ffffff" />
-          <input type="text" class="color-hex" id="e-textcolor-hex" value="#ffffff" maxlength="7" />
-        </div>
-      </div>
-      <div class="field" style="flex:1">
-        <span class="section-label">뱃지 강조색</span>
-        <div class="color-row" style="margin-top:0">
-          <input type="color" id="e-accentcolor" value="#7C5CFC" />
-          <input type="text" class="color-hex" id="e-accentcolor-hex" value="#7C5CFC" maxlength="7" />
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 설정 탭 -->
-<div class="scroll-area hidden" id="tab-settings">
-  <div class="settings-grid">
-    <div class="field settings-full">
-      <span class="section-label">폰트</span>
-      <input type="text" id="s-font" value="Noto Sans KR" placeholder="Figma에 설치된 폰트명" />
-    </div>
-    <div class="field">
-      <span class="section-label">너비 (px)</span>
-      <input type="number" id="s-width" value="1080" min="400" max="3000" />
-    </div>
-    <div class="field">
-      <span class="section-label">높이 (px)</span>
-      <input type="number" id="s-height" value="1080" min="400" max="3000" />
-    </div>
-    <div class="field">
-      <span class="section-label">제목 크기 (px)</span>
-      <input type="number" id="s-title-size" value="72" min="20" max="200" />
-    </div>
-    <div class="field">
-      <span class="section-label">본문 크기 (px)</span>
-      <input type="number" id="s-body-size" value="32" min="12" max="100" />
-    </div>
-    <div class="field">
-      <span class="section-label">여백 (px)</span>
-      <input type="number" id="s-padding" value="60" min="20" max="200" />
-    </div>
-    <div class="field settings-full" style="margin-top:4px">
-      <p style="font-size:11px;color:#888;line-height:1.6">
-        💡 <strong>권장 프레임:</strong> SNS 카드뉴스 1080×1080 / 스토리 1080×1920<br>
-        폰트는 Figma에 설치된 폰트명을 정확히 입력하세요. (예: Pretendard, Noto Sans KR)
-      </p>
-    </div>
-  </div>
-</div>
-
-<!-- 하단 버튼 -->
 <div class="action-bar">
-  <button class="btn btn-primary" id="btn-generate">Figma에 삽입</button>
-  <button class="btn btn-outline" id="btn-export" disabled>PNG 내보내기</button>
-  <button class="btn btn-outline" style="flex:0;padding:10px 14px" id="btn-cancel">✕</button>
+  <button class="btn btn-primary" id="btn-generate" disabled>Figma에 삽입</button>
+  <button class="btn btn-outline"  id="btn-export"   disabled>PNG 내보내기</button>
 </div>
 
 <script>
 // ─── 상태 ────────────────────────────────────────────────────────────────────
-let slides = [makeSlideDraft(1)];
-let selectedIdx = 0;
+let parsedSlides = [];
 let generatedFrameIds = [];
 
-function makeSlideDraft(num) {
-  return {
-    id: Date.now() + Math.random(),
-    title: '',
-    body: '',
-    tags: [],
-    bgType: 'color',
-    bgColor: '#1a1a1a',
-    bgImageBytes: null,
-    bgImageName: '',
-    overlayOpacity: 55,
-    textColor: '#ffffff',
-    accentColor: '#7C5CFC',
-  };
-}
+// ─── 테마 프리셋 ──────────────────────────────────────────────────────────────
+const THEMES = {
+  dark:   { bg: '#1a1a1a', text: '#ffffff', accent: '#7C5CFC' },
+  light:  { bg: '#ffffff', text: '#1a1a1a', accent: '#7C5CFC' },
+  brand:  { bg: '#7C5CFC', text: '#ffffff', accent: '#ffffff' },
+  custom: null,
+};
 
-// ─── 탭 전환 ────────────────────────────────────────────────────────────────
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('tab-slides').classList.toggle('hidden', tab.dataset.tab !== 'slides');
-    document.getElementById('tab-settings').classList.toggle('hidden', tab.dataset.tab !== 'settings');
-  });
-});
+// ─── MD 파싱 ─────────────────────────────────────────────────────────────────
+function parseMd(text) {
+  // 1. frontmatter 제거
+  text = text.replace(/^---[\s\S]*?---\n?/, '').trim();
 
-// ─── 슬라이드 목록 렌더링 ────────────────────────────────────────────────────
-function renderSlideList() {
-  const list = document.getElementById('slide-list');
-  list.innerHTML = '';
-  slides.forEach((slide, i) => {
-    const card = document.createElement('div');
-    card.className = 'slide-card' + (i === selectedIdx ? ' active' : '');
-
-    // 썸네일
-    const thumb = document.createElement('div');
-    thumb.className = 'slide-thumb';
-    thumb.style.background = slide.bgType === 'image' ? '#333' : slide.bgColor;
-    if (slide.bgType === 'image' && slide._thumbSrc) {
-      thumb.innerHTML = `<img class="slide-thumb-img" src="${slide._thumbSrc}" /><div class="slide-thumb-overlay" style="background:rgba(0,0,0,${slide.overlayOpacity/100})"></div>`;
-    }
-    const thumbContent = document.createElement('div');
-    thumbContent.className = 'slide-thumb-content';
-    if (slide.tags.length) thumbContent.innerHTML += `<div class="slide-thumb-tag" style="background:${slide.accentColor}"></div>`;
-    if (slide.title) thumbContent.innerHTML += `<div class="slide-thumb-title" style="color:${slide.textColor}">${slide.title.slice(0, 20)}</div>`;
-    thumb.appendChild(thumbContent);
-
-    const info = document.createElement('div');
-    info.className = 'slide-info';
-    info.innerHTML = `
-      <div class="slide-num">슬라이드 ${i + 1}</div>
-      <div class="slide-title-preview">${slide.title || '(제목 없음)'}</div>
-      ${slide.body ? `<div class="slide-body-preview">${slide.body}</div>` : ''}
-    `;
-
-    const actions = document.createElement('div');
-    actions.className = 'slide-actions';
-
-    if (i > 0) {
-      const up = document.createElement('button');
-      up.className = 'btn-icon';
-      up.title = '위로';
-      up.innerHTML = '↑';
-      up.addEventListener('click', e => { e.stopPropagation(); moveSlide(i, -1); });
-      actions.appendChild(up);
-    }
-    if (i < slides.length - 1) {
-      const down = document.createElement('button');
-      down.className = 'btn-icon';
-      down.title = '아래로';
-      down.innerHTML = '↓';
-      down.addEventListener('click', e => { e.stopPropagation(); moveSlide(i, 1); });
-      actions.appendChild(down);
-    }
-
-    const dup = document.createElement('button');
-    dup.className = 'btn-icon';
-    dup.title = '복제';
-    dup.innerHTML = '⧉';
-    dup.addEventListener('click', e => { e.stopPropagation(); duplicateSlide(i); });
-    actions.appendChild(dup);
-
-    if (slides.length > 1) {
-      const del = document.createElement('button');
-      del.className = 'btn-icon danger';
-      del.title = '삭제';
-      del.innerHTML = '✕';
-      del.addEventListener('click', e => { e.stopPropagation(); deleteSlide(i); });
-      actions.appendChild(del);
-    }
-
-    card.appendChild(thumb);
-    card.appendChild(info);
-    card.appendChild(actions);
-    card.addEventListener('click', () => selectSlide(i));
-    list.appendChild(card);
-  });
-}
-
-// ─── 슬라이드 조작 ───────────────────────────────────────────────────────────
-function selectSlide(i) {
-  saveCurrentSlide();
-  selectedIdx = i;
-  renderSlideList();
-  loadSlideToEditor(slides[i]);
-}
-
-function addSlide() {
-  saveCurrentSlide();
-  slides.push(makeSlideDraft(slides.length + 1));
-  selectedIdx = slides.length - 1;
-  renderSlideList();
-  loadSlideToEditor(slides[selectedIdx]);
-}
-
-function deleteSlide(i) {
-  slides.splice(i, 1);
-  selectedIdx = Math.min(selectedIdx, slides.length - 1);
-  renderSlideList();
-  loadSlideToEditor(slides[selectedIdx]);
-}
-
-function duplicateSlide(i) {
-  saveCurrentSlide();
-  const clone = JSON.parse(JSON.stringify(slides[i]));
-  clone.id = Date.now() + Math.random();
-  slides.splice(i + 1, 0, clone);
-  selectedIdx = i + 1;
-  renderSlideList();
-  loadSlideToEditor(slides[selectedIdx]);
-}
-
-function moveSlide(i, dir) {
-  saveCurrentSlide();
-  const j = i + dir;
-  [slides[i], slides[j]] = [slides[j], slides[i]];
-  selectedIdx = j;
-  renderSlideList();
-  loadSlideToEditor(slides[selectedIdx]);
-}
-
-// ─── 에디터 로드 ─────────────────────────────────────────────────────────────
-function loadSlideToEditor(slide) {
-  document.getElementById('editor-title').textContent = `슬라이드 ${selectedIdx + 1} 편집`;
-  document.getElementById('e-title').value = slide.title || '';
-  document.getElementById('e-body').value = slide.body || '';
-
-  // 태그
-  renderTags(slide.tags || []);
-
-  // 배경 타입
-  const isBgImage = slide.bgType === 'image';
-  document.querySelectorAll('.bg-toggle-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.bg === slide.bgType);
-  });
-  document.getElementById('bg-color-area').classList.toggle('hidden', isBgImage);
-  document.getElementById('bg-image-area').classList.toggle('hidden', !isBgImage);
-
-  // 색상
-  setColorPair('e-bgcolor', 'e-bgcolor-hex', slide.bgColor || '#1a1a1a');
-  setColorPair('e-textcolor', 'e-textcolor-hex', slide.textColor || '#ffffff');
-  setColorPair('e-accentcolor', 'e-accentcolor-hex', slide.accentColor || '#7C5CFC');
-
-  // 이미지 프리뷰
-  const preview = document.getElementById('img-preview');
-  const hint = document.getElementById('upload-hint');
-  if (slide._thumbSrc) {
-    preview.src = slide._thumbSrc;
-    preview.style.display = 'block';
-    hint.style.display = 'none';
+  // 2. --- 구분자로 섹션 분리, 없으면 ## 헤더로 분리
+  let sections;
+  if (/\n---+\n/.test(text)) {
+    sections = text.split(/\n---+\n/).map(s => s.trim()).filter(Boolean);
   } else {
-    preview.style.display = 'none';
-    hint.style.display = '';
+    // ## 헤더 기준으로 분리
+    sections = text.split(/\n(?=##\s)/).map(s => s.trim()).filter(Boolean);
+    // 첫 섹션에 ## 없으면 그대로 유지
   }
 
-  // 오버레이
-  document.getElementById('overlay-range').value = slide.overlayOpacity ?? 55;
-  document.getElementById('overlay-val').textContent = (slide.overlayOpacity ?? 55) + '%';
-}
+  const listAsTagsEl = document.getElementById('list-as-tags');
+  const listAsTags = listAsTagsEl ? listAsTagsEl.checked : true;
 
-function setColorPair(colorId, hexId, val) {
-  document.getElementById(colorId).value = val;
-  document.getElementById(hexId).value = val;
-}
+  return sections.map((section, i) => {
+    const lines = section.split('\n').map(l => l.trim()).filter(Boolean);
+    let title = '';
+    const bodyLines = [];
+    const tags = [];
 
-// ─── 에디터 저장 ─────────────────────────────────────────────────────────────
-function saveCurrentSlide() {
-  const slide = slides[selectedIdx];
-  if (!slide) return;
-  slide.title        = document.getElementById('e-title').value;
-  slide.body         = document.getElementById('e-body').value;
-  slide.bgColor      = document.getElementById('e-bgcolor').value;
-  slide.textColor    = document.getElementById('e-textcolor').value;
-  slide.accentColor  = document.getElementById('e-accentcolor').value;
-  slide.overlayOpacity = Number(document.getElementById('overlay-range').value);
-  // tags already updated reactively
-}
+    for (const line of lines) {
+      // 헤더 → 제목 (첫 번째 헤더만 제목으로)
+      const hMatch = line.match(/^#{1,3}\s+(.+)/);
+      if (hMatch) {
+        if (!title) title = hMatch[1].trim();
+        else bodyLines.push(hMatch[1].trim()); // 추가 헤더는 본문에
+        continue;
+      }
+      // 볼드 슬라이드 레이블 (**슬라이드 N: ...**) → 무시
+      if (/^\*\*슬라이드\s*\d+/.test(line) || /^\*\*Slide\s*\d+/.test(line)) continue;
+      // 슬라이드 레이블 텍스트 (슬라이드 N:) → 무시
+      if (/^슬라이드\s*\d+[:\.]/.test(line) || /^Slide\s*\d+[:\.]/.test(line)) continue;
 
-// ─── 태그 ─────────────────────────────────────────────────────────────────────
-function renderTags(tags) {
-  const wrap = document.getElementById('tag-wrap');
-  const input = document.getElementById('tag-input');
-  // remove existing pills
-  wrap.querySelectorAll('.tag-pill').forEach(p => p.remove());
-  tags.forEach((tag, i) => {
-    const pill = document.createElement('span');
-    pill.className = 'tag-pill';
-    pill.innerHTML = `${tag}<button class="tag-pill-remove" data-i="${i}">×</button>`;
-    pill.querySelector('.tag-pill-remove').addEventListener('click', () => {
-      slides[selectedIdx].tags.splice(i, 1);
-      renderTags(slides[selectedIdx].tags);
-      renderSlideList();
-    });
-    wrap.insertBefore(pill, input);
-  });
-}
-
-document.getElementById('tag-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ',') {
-    e.preventDefault();
-    const val = e.target.value.trim().replace(/,$/, '');
-    if (val) {
-      slides[selectedIdx].tags.push(val);
-      e.target.value = '';
-      renderTags(slides[selectedIdx].tags);
-      renderSlideList();
+      // 목록 항목
+      const listMatch = line.match(/^[-*+]\s+(.+)/);
+      if (listMatch) {
+        const item = listMatch[1].replace(/\*\*/g, '').trim();
+        if (listAsTags && item.length <= 30) {
+          tags.push(item);
+        } else {
+          bodyLines.push('• ' + item);
+        }
+        continue;
+      }
+      // 번호 목록
+      const numMatch = line.match(/^\d+\.\s+(.+)/);
+      if (numMatch) {
+        bodyLines.push(numMatch[1].replace(/\*\*/g, '').trim());
+        continue;
+      }
+      // 일반 텍스트 (볼드 마크다운 제거)
+      const clean = line.replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1');
+      if (clean) bodyLines.push(clean);
     }
-  }
-  if (e.key === 'Backspace' && !e.target.value && slides[selectedIdx].tags.length) {
-    slides[selectedIdx].tags.pop();
-    renderTags(slides[selectedIdx].tags);
-  }
-});
-document.getElementById('tag-wrap').addEventListener('click', () => {
-  document.getElementById('tag-input').focus();
-});
 
-// ─── 배경 토글 ───────────────────────────────────────────────────────────────
-document.querySelectorAll('.bg-toggle-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.bg-toggle-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const isImage = btn.dataset.bg === 'image';
-    slides[selectedIdx].bgType = btn.dataset.bg;
-    document.getElementById('bg-color-area').classList.toggle('hidden', isImage);
-    document.getElementById('bg-image-area').classList.toggle('hidden', !isImage);
-  });
-});
+    // 제목이 없으면 첫 body 라인을 제목으로
+    if (!title && bodyLines.length > 0) {
+      title = bodyLines.shift();
+    }
 
-// ─── 이미지 업로드 ───────────────────────────────────────────────────────────
-document.getElementById('bg-file').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const ab = await file.arrayBuffer();
-  const bytes = Array.from(new Uint8Array(ab));
-  slides[selectedIdx].bgImageBytes = bytes;
-  slides[selectedIdx].bgImageName = file.name;
-
-  const url = URL.createObjectURL(file);
-  slides[selectedIdx]._thumbSrc = url;
-
-  document.getElementById('img-preview').src = url;
-  document.getElementById('img-preview').style.display = 'block';
-  document.getElementById('upload-hint').style.display = 'none';
-  renderSlideList();
-});
-
-document.getElementById('overlay-range').addEventListener('input', e => {
-  document.getElementById('overlay-val').textContent = e.target.value + '%';
-  slides[selectedIdx].overlayOpacity = Number(e.target.value);
-});
-
-// ─── 색상 피커 동기화 ─────────────────────────────────────────────────────────
-function syncColor(colorId, hexId) {
-  const cp = document.getElementById(colorId);
-  const hx = document.getElementById(hexId);
-  cp.addEventListener('input', () => { hx.value = cp.value; });
-  hx.addEventListener('input', () => {
-    if (/^#[0-9a-fA-F]{6}$/.test(hx.value)) cp.value = hx.value;
+    return {
+      title: title || `슬라이드 ${i + 1}`,
+      body: bodyLines.join('\n'),
+      tags,
+      bgType: 'color',
+    };
   });
 }
-syncColor('e-bgcolor', 'e-bgcolor-hex');
-syncColor('e-textcolor', 'e-textcolor-hex');
-syncColor('e-accentcolor', 'e-accentcolor-hex');
 
-// ─── 슬라이드 추가 ───────────────────────────────────────────────────────────
-document.getElementById('add-slide-btn').addEventListener('click', addSlide);
+// ─── 슬라이드 미리보기 렌더링 ────────────────────────────────────────────────
+function renderPreviews(slides) {
+  const container = document.getElementById('slide-previews');
+  container.innerHTML = '';
+  slides.forEach((slide, i) => {
+    const el = document.createElement('div');
+    el.className = 'slide-preview-item';
+    el.innerHTML = `
+      <div class="slide-preview-num">${i + 1}</div>
+      <div style="flex:1;min-width:0">
+        <div class="slide-preview-title">${slide.title || '(제목 없음)'}</div>
+        ${slide.body ? `<div class="slide-preview-body">${slide.body.slice(0, 60)}${slide.body.length > 60 ? '…' : ''}</div>` : ''}
+        ${slide.tags.length ? `<div class="slide-preview-tags">${slide.tags.map(t => `<span class="slide-preview-tag">${t}</span>`).join('')}</div>` : ''}
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+// ─── 파일 처리 ───────────────────────────────────────────────────────────────
+async function handleFile(file) {
+  if (!file || !file.name.endsWith('.md')) {
+    setStatus('MD 파일(.md)을 업로드해주세요.', 'err');
+    return;
+  }
+  const text = await file.text();
+  parsedSlides = parseMd(text);
+
+  if (!parsedSlides.length) {
+    setStatus('슬라이드를 파싱할 수 없었습니다. MD 파일 구조를 확인해주세요.', 'err');
+    return;
+  }
+
+  // UI 업데이트
+  document.getElementById('dropzone').classList.add('hidden');
+  document.getElementById('file-info').classList.remove('hidden');
+  document.getElementById('file-name-text').textContent = file.name;
+  document.getElementById('file-meta-text').textContent = `${parsedSlides.length}개 슬라이드 파싱 완료`;
+  document.getElementById('preview-section').classList.remove('hidden');
+  document.getElementById('settings-section').classList.remove('hidden');
+
+  renderPreviews(parsedSlides);
+  document.getElementById('btn-generate').disabled = false;
+  setStatus(`✓ ${parsedSlides.length}장 슬라이드를 파싱했습니다.`, 'ok');
+}
+
+// 파일 input
+document.getElementById('md-file').addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+// 드래그 앤 드롭
+const dropzone = document.getElementById('dropzone');
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+// 파일 변경
+document.getElementById('btn-clear').addEventListener('click', () => {
+  parsedSlides = [];
+  generatedFrameIds = [];
+  document.getElementById('md-file').value = '';
+  document.getElementById('dropzone').classList.remove('hidden');
+  document.getElementById('file-info').classList.add('hidden');
+  document.getElementById('preview-section').classList.add('hidden');
+  document.getElementById('settings-section').classList.add('hidden');
+  document.getElementById('btn-generate').disabled = true;
+  document.getElementById('btn-export').disabled = true;
+  setStatus('');
+});
+
+// 목록→태그 옵션 변경 시 재파싱
+document.getElementById('list-as-tags').addEventListener('change', () => {
+  if (!parsedSlides.length) return;
+  // 현재 파일을 다시 파싱하려면 파일을 다시 읽어야 하므로
+  // 현재 파싱된 결과만 다시 렌더링 (단순 표시 용도)
+  renderPreviews(parsedSlides);
+});
+
+// ─── 테마 ────────────────────────────────────────────────────────────────────
+let currentTheme = 'dark';
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTheme = btn.dataset.theme;
+    document.getElementById('custom-colors').classList.toggle('hidden', currentTheme !== 'custom');
+  });
+});
+
+// 색상 피커 동기화
+function syncColor(cId, hId) {
+  const cp = document.getElementById(cId), hx = document.getElementById(hId);
+  cp.addEventListener('input', () => { hx.value = cp.value; });
+  hx.addEventListener('input', () => { if (/^#[0-9a-fA-F]{6}$/.test(hx.value)) cp.value = hx.value; });
+}
+syncColor('c-bg', 'c-bg-hex');
+syncColor('c-text', 'c-text-hex');
+syncColor('c-accent', 'c-accent-hex');
+
+// ─── 프레임 프리셋 ───────────────────────────────────────────────────────────
+document.getElementById('s-preset').addEventListener('change', e => {
+  const [w, h] = e.target.value === 'custom'
+    ? [document.getElementById('s-width').value, document.getElementById('s-height').value]
+    : e.target.value.split('x');
+  if (e.target.value !== 'custom') {
+    document.getElementById('s-width').value = w;
+    document.getElementById('s-height').value = h;
+  }
+  document.getElementById('custom-size-field').style.display = e.target.value === 'custom' ? 'flex' : 'none';
+});
+// 초기 숨김
+document.getElementById('custom-size-field').style.display = 'none';
+
+// ─── 설정 접기/펼치기 ────────────────────────────────────────────────────────
+document.getElementById('settings-toggle').addEventListener('click', () => {
+  const body = document.getElementById('settings-body');
+  const chevron = document.querySelector('.chevron');
+  const isOpen = !body.classList.contains('hidden');
+  body.classList.toggle('hidden', isOpen);
+  chevron.classList.toggle('open', !isOpen);
+});
 
 // ─── 설정 읽기 ───────────────────────────────────────────────────────────────
 function getSettings() {
+  const theme = THEMES[currentTheme] || {
+    bg:     document.getElementById('c-bg').value,
+    text:   document.getElementById('c-text').value,
+    accent: document.getElementById('c-accent').value,
+  };
   return {
     fontFamily: document.getElementById('s-font').value.trim() || 'Inter',
     width:      Number(document.getElementById('s-width').value) || 1080,
     height:     Number(document.getElementById('s-height').value) || 1080,
     titleSize:  Number(document.getElementById('s-title-size').value) || 72,
     bodySize:   Number(document.getElementById('s-body-size').value) || 32,
-    padding:    Number(document.getElementById('s-padding').value) || 60,
+    padding:    60,
+    defaultBgColor:    theme.bg,
+    defaultTextColor:  theme.text,
+    defaultAccentColor: theme.accent,
   };
 }
 
-// ─── 상태 메시지 ─────────────────────────────────────────────────────────────
-function setStatus(msg, type = '') {
-  const el = document.getElementById('status');
-  el.textContent = msg;
-  el.className = 'status' + (type ? ' ' + type : '');
+// ─── 슬라이드에 테마 색상 주입 ───────────────────────────────────────────────
+function getSlidesWithTheme() {
+  const s = getSettings();
+  return parsedSlides.map(slide => ({
+    ...slide,
+    bgColor:     slide.bgColor     || s.defaultBgColor,
+    textColor:   slide.textColor   || s.defaultTextColor,
+    accentColor: slide.accentColor || s.defaultAccentColor,
+  }));
 }
 
-// ─── Figma에 삽입 ─────────────────────────────────────────────────────────────
+// ─── Figma 삽입 ───────────────────────────────────────────────────────────────
 document.getElementById('btn-generate').addEventListener('click', () => {
-  saveCurrentSlide();
-  renderSlideList();
-
-  const valid = slides.every(s => s.title.trim());
-  if (!valid) { setStatus('모든 슬라이드에 제목을 입력해주세요.', 'err'); return; }
-
+  if (!parsedSlides.length) return;
   document.getElementById('btn-generate').disabled = true;
   setStatus('Figma에 삽입 중...');
-
   window.parent.postMessage({
-    pluginMessage: { type: 'generate', slides, settings: getSettings() }
+    pluginMessage: { type: 'generate', slides: getSlidesWithTheme(), settings: getSettings() }
   }, '*');
 });
 
@@ -589,11 +497,6 @@ document.getElementById('btn-export').addEventListener('click', () => {
   }, '*');
 });
 
-// ─── 닫기 ────────────────────────────────────────────────────────────────────
-document.getElementById('btn-cancel').addEventListener('click', () => {
-  window.parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
-});
-
 // ─── Figma 메시지 수신 ────────────────────────────────────────────────────────
 window.addEventListener('message', e => {
   const msg = e.data.pluginMessage;
@@ -603,23 +506,19 @@ window.addEventListener('message', e => {
     generatedFrameIds = msg.frameIds || [];
     document.getElementById('btn-generate').disabled = false;
     document.getElementById('btn-export').disabled = false;
-    setStatus(`✓ ${msg.count}장 삽입 완료! PNG 내보내기도 가능합니다.`, 'ok');
+    setStatus(`✓ ${msg.count}장 삽입 완료! PNG 내보내기 가능합니다.`, 'ok');
   }
-
   if (msg.type === 'export-done') {
     document.getElementById('btn-export').disabled = false;
     msg.results.forEach(({ name, bytes }) => {
       const blob = new Blob([new Uint8Array(bytes)], { type: 'image/png' });
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
-      a.href     = url;
-      a.download = `${name}.png`;
-      a.click();
+      a.href = url; a.download = `${name}.png`; a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
     setStatus(`✓ PNG ${msg.results.length}장 다운로드 완료!`, 'ok');
   }
-
   if (msg.type === 'error') {
     document.getElementById('btn-generate').disabled = false;
     document.getElementById('btn-export').disabled = false;
@@ -627,9 +526,12 @@ window.addEventListener('message', e => {
   }
 });
 
-// ─── 초기화 ──────────────────────────────────────────────────────────────────
-renderSlideList();
-loadSlideToEditor(slides[0]);
+// ─── 상태 메시지 ─────────────────────────────────────────────────────────────
+function setStatus(msg, type = '') {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status' + (type ? ' ' + type : '');
+}
 </script>
 </body>
 </html>
